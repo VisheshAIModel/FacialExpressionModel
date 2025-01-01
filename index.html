@@ -7,26 +7,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #e9ecef;
+            background-color: #f0f0f0;
         }
         h1 {
             margin-bottom: 20px;
-            color: #343a40;
+            color: #333;
         }
         #webcam-container {
             margin-bottom: 20px;
-            border: 2px solid #007bff;
+            border: 2px solid #ccc;
             border-radius: 10px;
             overflow: hidden;
             background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         #label-container {
             display: flex;
@@ -42,7 +41,7 @@
             margin: 5px 0;
             width: 250px;
             text-align: center;
-            font-size: 18px;
+            font-size: 20px; /* Increased font size for better visibility */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
         }
@@ -57,12 +56,11 @@
             background-color: #28a745;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: background-color 0.3s;
             margin-bottom: 20px;
         }
         button:hover {
             background-color: #218838;
-            transform: scale(1.05);
         }
         input[type="file"] {
             margin-bottom: 20px;
@@ -109,18 +107,15 @@
 
         async function uploadImage(event) {
             const file = event.target.files[0];
-            if (file) {
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(file);
-                img.onload = async () => {
-                    const prediction = await model.predict(img);
-                    displayPredictions(prediction);
-                };
-            }
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.onload = async () => {
+                const prediction = await model.predict(img);
+                displayPredictions(prediction);
+            };
         }
 
-        async ```html
-        function loop() {
+        async function loop() {
             webcam.update();
             await predict();
             window.requestAnimationFrame(loop);
@@ -136,11 +131,6 @@
                 const classPrediction = prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(2) + "%";
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
-        }
-    </script>
-</body>
-</html>
-``` ```html
         }
     </script>
 </body>
