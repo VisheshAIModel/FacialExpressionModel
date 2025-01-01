@@ -41,12 +41,8 @@
             margin: 5px 0;
             width: 250px;
             text-align: center;
-            font-size: 20px; /* Increased font size for better visibility */
+            font-size: 18px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
-        }
-        .label:hover {
-            transform: scale(1.05);
         }
         button {
             padding: 10px 20px;
@@ -62,76 +58,63 @@
         button:hover {
             background-color: #218838;
         }
-        input[type="file"] {
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
     <h1>Teachable Machine Image Model</h1>
-    <button type="button" onclick="useWebcam()">Use Webcam</button>
-    <input type="file" accept="image/*" onchange="uploadImage(event)" />
+    <button type="button" onclick="init()">Start Webcam</button>
     <div id="webcam-container"></div>
     <div id="label-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
-        const URL = "https://raw.githubusercontent.com/VisheshAIModel/FacialExpressionModel/main/";
+        // The link to your model provided by Teachable Machine export panel
+        const URL = "./my_model/";
 
         let model, webcam, labelContainer, maxPredictions;
 
-        async function loadModel() {
+        // Load the image model and setup the webcam
+        async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
+            // Load the model and metadata
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
+
+            // Setup webcam
+            const flip = true; // Whether to flip the webcam
+            webcam = new tmImage.Webcam(200, 200, flip); // Width, height, flip
+            await webcam.setup(); // Request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // Append elements to the DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) {
+            for (let i = 0; i < maxPredictions; i++) { // Create class labels
                 const labelDiv = document.createElement("div");
                 labelDiv.className = "label";
                 labelContainer.appendChild(labelDiv);
             }
         }
 
-        async function useWebcam() {
-            await loadModel();
-            const flip = true;
-            webcam = new tmImage.Webcam(200, 200, flip);
-            await webcam.setup();
-            await webcam.play();
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            window.requestAnimationFrame(loop);
-        }
-
-        async function uploadImage(event) {
-            const file = event.target.files[0];
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.onload = async () => {
-                const prediction = await model.predict(img);
-                displayPredictions(prediction);
-            };
-        }
-
         async function loop() {
-            webcam.update();
+            webcam.update(); // Update the webcam frame
             await predict();
             window.requestAnimationFrame(loop);
         }
 
+        // Run the webcam image through the image model
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
-            displayPredictions(prediction);
-        }
-
-        function displayPredictions(prediction) {
             for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction = prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(2) + "%";
+                const classPrediction =
+                    prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(2) + "%";
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
         }
     </script>
 </body>
-</html>
+</html
