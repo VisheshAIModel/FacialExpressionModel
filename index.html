@@ -109,18 +109,23 @@
 
         async function uploadImage(event) {
             const file = event.target.files[0];
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.onload = async () => {
-                const prediction = await model.predict(img);
-                displayPredictions(prediction);
-            };
+            if (file) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.onload = async () => {
+                    const prediction = await model.predict(img);
+                    displayPredictions(prediction);
+                };
+            }
         }
 
-        async function loop() {
+        async ```html
+        function loop() {
             webcam.update();
             await predict();
             window.requestAnimationFrame(loop);
+        }
+
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             displayPredictions(prediction);
@@ -131,6 +136,11 @@
                 const classPrediction = prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(2) + "%";
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
+        }
+    </script>
+</body>
+</html>
+``` ```html
         }
     </script>
 </body>
