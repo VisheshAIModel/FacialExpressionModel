@@ -58,56 +58,66 @@
 </head>
 <body>
     <h1>Teachable Machine Image Model</h1>
-    <button type="button" onclick="init()">Start</button>
+    <button type="button" onclick="useWebcam()">Use Webcam</button>
+    <input type="file" accept="image/*" onchange="uploadImage(event)" />
     <div id="webcam-container"></div>
     <div id="label-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
-        // the link to your model provided by Teachable Machine export panel
-        const URL = "./my_model/";
+        const URL = "https://raw.githubusercontent.com/VisheshAIModel/FacialExpressionModel/main/";
 
         let model, webcam, labelContainer, maxPredictions;
 
-        // Load the image model and setup the webcam
-        async function init() {
+        async function loadModel() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-            // load the model and metadata
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
-
-            // Setup webcam
-            const flip = true; // whether to flip the webcam
-            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-            await webcam.setup(); // request access to the webcam
-            await webcam.play();
-            window.requestAnimationFrame(loop);
-
-            // Append elements to the DOM
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) { // and class labels
+            for (let i = 0; i < maxPredictions; i++) {
                 const labelDiv = document.createElement("div");
                 labelDiv.className = "label";
                 labelContainer.appendChild(labelDiv);
             }
         }
 
+        async function useWebcam() {
+            await loadModel();
+            const flip = true;
+            webcam = new tmImage.Webcam(200, 200, flip);
+            await webcam.setup();
+            await webcam.play();
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            window.requestAnimationFrame(loop);
+        }
+
+        async function uploadImage(event) {
+            const file = event.target.files[0];
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.onload = async () => {
+                const prediction = await model.predict(img);
+                displayPredictions(prediction);
+            };
+        }
+
         async function loop() {
-            webcam.update(); // update the webcam frame
+            webcam.update();
             await predict();
             window.requestAnimationFrame(loop);
         }
 
-        // Run the webcam image through the image model
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
+            displayPredictions(prediction);
+        }
+
+        function displayPredictions(prediction) {
             for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction =
-                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
         }
